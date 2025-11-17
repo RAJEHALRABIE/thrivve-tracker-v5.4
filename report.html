@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <title>تقرير أسبوع الحافز - متابع حافز ثرايف V3</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#22c55e',
+              dark: '#020617',
+              card: '#0f172a',
+              soft: '#1e293b'
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      @media print {
+        body {
+          background: white !important;
+        }
+        .no-print {
+          display: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-dark text-slate-100 min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 py-6 space-y-4">
+      <div class="no-print flex justify-between items-center">
+        <h1 class="text-lg font-bold text-primary">تقرير أسبوع الحافز</h1>
+        <button onclick="window.print()" class="px-4 py-2 rounded-2xl bg-primary text-dark text-xs font-semibold">
+          طباعة / حفظ كـ PDF
+        </button>
+      </div>
+      <div id="reportRoot" class="bg-card rounded-2xl border border-slate-800 p-4 space-y-4 text-xs">
+        <p class="text-[11px] text-slate-400">
+          يتم توليد التقرير اعتمادًا على بيانات الأسبوع الحالي المخزنة في المتصفح. تأكد من فتح هذا التقرير من نفس
+          الجهاز والمتصفح المستخدمين أثناء التسجيل.
+        </p>
+      </div>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>

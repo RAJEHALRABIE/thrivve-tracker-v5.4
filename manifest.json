@@ -1,0 +1,10 @@
+{
+  "name": "متابع حافز ثرايف V3",
+  "short_name": "حافز ثرايف",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#0f172a",
+  "lang": "ar",
+  "dir": "rtl"
+}
