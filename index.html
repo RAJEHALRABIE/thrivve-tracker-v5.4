@@ -1,315 +1,432 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
-    <meta charset="utf-8" />
-    <title>متابع حافز ثرايف V3</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0f172a" />
-    <link rel="manifest" href="manifest.json" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: '#22c55e',
-              dark: '#020617',
-              card: '#0f172a',
-              soft: '#1e293b',
-              accent: '#38bdf8'
-            },
-            boxShadow: {
-              soft: '0 18px 45px rgba(15,23,42,0.85)'
-            },
-            borderRadius: {
-              '2xl': '1.25rem'
-            }
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+  />
+  <title>متابع حافز ثرايف</title>
+  <meta name="theme-color" content="#020617" />
+
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dark: "#020617",
+            soft: "#0f172a",
+            card: "#020617",
+            primary: "#22c55e"
+          },
+          boxShadow: {
+            soft: "0 18px 45px rgba(15,23,42,0.9)"
+          },
+          borderRadius: {
+            "2xl": "1.25rem"
           }
         }
       }
-    </script>
-  </head>
-  <body class="bg-dark text-slate-100 min-h-screen">
-    <div class="max-w-5xl mx-auto px-3 py-4 space-y-4">
-      <header class="flex flex-col gap-2 sticky top-0 z-20 bg-dark/80 backdrop-blur border-b border-slate-800 pb-3">
-        <div class="flex items-center justify-between gap-3">
-          <div class="flex items-center gap-2">
-            <div class="w-9 h-9 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <span class="text-primary font-bold text-sm">TH</span>
-            </div>
-            <div>
-              <h1 class="text-lg font-bold text-primary">متابع حافز ثرايف V3</h1>
-              <p class="text-[11px] text-slate-400">
-                متابعة أسبوع الحافز من الإثنين إلى الأحد، مع حساب الشروط بشكل لحظي ومخصص للجوال.
-              </p>
-            </div>
-          </div>
-          <button id="installBtn" class="hidden px-3 py-1.5 rounded-2xl bg-primary text-dark text-xs font-semibold shadow-soft">
-            تثبيت على الجوال
-          </button>
-        </div>
-        <div class="flex items-center justify-between text-[11px] text-slate-400">
-          <span id="weekInfo">الأسبوع الحالي: من الإثنين إلى الأحد (حسب تاريخ جهازك).</span>
-          <button id="newWeekBtn" class="px-3 py-1 rounded-2xl bg-soft text-slate-200 border border-slate-700">
-            بدء أسبوع جديد
-          </button>
-        </div>
-      </header>
+    }
+  </script>
 
-      <section class="space-y-3">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div class="bg-card rounded-2xl p-3 border border-slate-800 shadow-soft flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-              <p class="text-[11px] text-slate-400">وضع الحافز</p>
-              <span id="eligibilityBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
-                في انتظار بيانات الرحلات
-              </span>
-            </div>
-            <p id="totalIncentive" class="text-xl font-bold mt-2">0.00 ر.س</p>
-            <p class="text-[11px] text-slate-400 mt-1">
-              قيمة الحافز المتوقعة = عدد الرحلات × قيمة الحافز لكل رحلة (إذا تحققت جميع الشروط).
+  <style>
+    body {
+      background-color: #020617;
+      color: #e5e7eb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1f2937;
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-dark text-slate-100">
+  <main class="max-w-md mx-auto px-3 py-3 pb-6 space-y-3">
+
+    <!-- Header + الهامبرغر + الأسبوع + القائمة المنزلقة -->
+    <header class="flex flex-col gap-2 sticky top-0 z-20 bg-dark/90 backdrop-blur border-b border-slate-800 pb-3">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <button id="menuToggleBtn"
+            class="w-9 h-9 rounded-2xl bg-soft flex flex-col items-center justify-center gap-0.5 border border-slate-700">
+            <span class="w-4 h-0.5 bg-slate-200 rounded-full"></span>
+            <span class="w-4 h-0.5 bg-slate-200 rounded-full"></span>
+            <span class="w-4 h-0.5 bg-slate-200 rounded-full"></span>
+          </button>
+          <div>
+            <h1 class="text-lg font-bold text-primary">متابع حافز ثرايف</h1>
+            <p class="text-[11px] text-slate-400">
+              متابعة أسبوع الحافز من الإثنين إلى الأحد، مع واجهة مبسطة للجوال.
             </p>
           </div>
-
-          <div class="bg-card rounded-2xl p-3 border border-slate-800 shadow-soft">
-            <p class="text-[11px] text-slate-400">الدخل الأساسي من الرحلات (تقريبي)</p>
-            <p id="totalFare" class="text-xl font-bold mt-2">0.00 ر.س</p>
-            <p id="incomeBoost" class="text-[11px] text-slate-400 mt-1">
-              نسبة الزيادة الفعلية ستظهر بعد إدخال قيم الرحلات وتحقيق الشروط.
-            </p>
-          </div>
-
-          <div class="bg-card rounded-2xl p-3 border border-slate-800 shadow-soft">
-            <p class="text-[11px] text-slate-400">ملخص عام</p>
-            <div class="flex justify-between text-xs mt-2">
-              <div class="space-y-1">
-                <p>الرحلات</p>
-                <p id="summaryTrips" class="font-semibold text-slate-100">0</p>
-              </div>
-              <div class="space-y-1">
-                <p>ساعات العمل</p>
-                <p id="summaryHours" class="font-semibold text-slate-100">0</p>
-              </div>
-              <div class="space-y-1 text-right">
-                <p>ذروة (رحلات)</p>
-                <p id="summaryPeakTrips" class="font-semibold text-slate-100">0%</p>
-              </div>
-            </div>
-          </div>
         </div>
+        <button id="installBtn"
+          class="hidden px-3 py-1.5 rounded-2xl bg-primary text-dark text-xs font-semibold shadow-soft">
+          تثبيت كتطبيق
+        </button>
+      </div>
+      <div class="flex items-center justify-between text-[11px] text-slate-400">
+        <span id="weekInfo">الأسبوع الحالي: من الإثنين إلى الأحد (حسب تاريخ جهازك).</span>
+        <button id="newWeekBtn" class="px-3 py-1 rounded-2xl bg-soft text-slate-200 border border-slate-700">
+          بدء أسبوع جديد
+        </button>
+      </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-          <div class="bg-card rounded-2xl p-3 border border-slate-800 space-y-2">
-            <div class="flex items-center justify-between">
-              <p class="font-semibold text-slate-100 text-sm">ساعات العمل والرحلات</p>
-              <span id="hoursStatus" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300"></span>
-            </div>
-            <div class="grid grid-cols-2 gap-2 mt-1">
-              <div class="bg-soft rounded-2xl p-2 space-y-1">
-                <p class="text-[11px] text-slate-400">إجمالي ساعات العمل (من مدد الرحلات)</p>
-                <p id="totalHours" class="text-lg font-bold">0</p>
-              </div>
-              <div class="bg-soft rounded-2xl p-2 space-y-1">
-                <p class="text-[11px] text-slate-400">إجمالي عدد الرحلات</p>
-                <p id="totalTrips" class="text-lg font-bold">0</p>
-              </div>
-            </div>
-            <div class="bg-soft rounded-2xl p-2 space-y-1 mt-2">
-              <p class="text-[11px] text-slate-400">الشرط التصاعدي للرحلات</p>
-              <p id="requiredTripsText" class="text-[11px] text-slate-200"></p>
-              <p id="remainingTripsText" class="text-[11px] text-amber-300"></p>
-            </div>
-          </div>
-
-          <div class="bg-card rounded-2xl p-3 border border-slate-800 space-y-2">
-            <div class="flex items-center justify-between">
-              <p class="font-semibold text-slate-100 text-sm">الذروة والقبول والإلغاء</p>
-              <span id="peakStatus" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300"></span>
-            </div>
-            <div class="grid grid-cols-2 gap-2 mt-1">
-              <div class="bg-soft rounded-2xl p-2 space-y-1">
-                <p class="text-[11px] text-slate-400">نسبة رحلات الذروة (رسميًا بالرحلات)</p>
-                <p id="peakTripsRatio" class="text-lg font-bold">0%</p>
-              </div>
-              <div class="bg-soft rounded-2xl p-2 space-y-1">
-                <p class="text-[11px] text-slate-400">نسبة وقت العمل في الذروة (إنصاف شخصي)</p>
-                <p id="peakTimeRatio" class="text-lg font-bold">0%</p>
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-2 mt-2">
-              <div class="bg-soft rounded-2xl p-2 space-y-1">
-                <p class="text-[11px] text-slate-400">نسبة القبول الرسمية</p>
-                <p id="acceptanceDisplay" class="text-sm font-semibold">غير مدخل</p>
-              </div>
-              <div class="bg-soft rounded-2xl p-2 space-y-1">
-                <p class="text-[11px] text-slate-400">نسبة الإلغاء الرسمية</p>
-                <p id="cancelDisplay" class="text-sm font-semibold">غير مدخل</p>
-              </div>
-            </div>
-            <p id="qualityHint" class="text-[11px] text-slate-400 mt-1"></p>
-          </div>
+      <!-- قائمة منزلقة -->
+      <div id="sideMenu"
+           class="fixed inset-y-0 right-0 w-64 bg-card border-l border-slate-800 shadow-soft translate-x-full
+                  transition-transform duration-200 z-30">
+        <div class="flex items-center justify-between px-3 py-3 border-b border-slate-800">
+          <span class="text-sm font-semibold text-slate-100">القائمة</span>
+          <button id="closeMenuBtn"
+            class="w-7 h-7 rounded-full bg-soft flex items-center justify-center text-slate-300 text-xs border border-slate-700">
+            ✕
+          </button>
         </div>
-      </section>
+        <nav class="flex flex-col px-3 py-2 text-[13px] space-y-1">
+          <button class="nav-btn w-full text-right px-3 py-2 rounded-2xl bg-soft text-slate-100"
+                  data-nav-view="dashboard">
+            🟢 الداشبورد
+          </button>
+          <button class="nav-btn w-full text-right px-3 py-2 rounded-2xl bg-transparent text-slate-200 hover:bg-soft"
+                  data-nav-view="rides">
+            🚗 الرحلات
+          </button>
+          <button class="nav-btn w-full text-right px-3 py-2 rounded-2xl bg-transparent text-slate-200 hover:bg-soft"
+                  data-nav-view="settings">
+            ⚙️ الإعدادات
+          </button>
+          <button class="nav-btn w-full text-right px-3 py-2 rounded-2xl bg-transparent text-slate-200 hover:bg-soft"
+                  data-nav-view="report">
+            📄 تقرير الأسبوع
+          </button>
+        </nav>
+      </div>
+    </header>
 
-      <section class="bg-card rounded-2xl border border-slate-800 shadow-soft p-3 space-y-3">
+    <!-- شارة أهلية الحافز -->
+    <section data-view="dashboard">
+      <div class="bg-card rounded-2xl border border-slate-800 shadow-soft p-3 flex items-center justify-between">
+        <div>
+          <p class="text-[11px] text-slate-400 mb-1">حالة أهلية الحافز (تقديرية)</p>
+          <p id="eligibilityBadge"
+             class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-200">
+            في انتظار بيانات رحلات هذا الأسبوع.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- الداشبورد: ملخصات، ساعات، ذروة -->
+    <section class="space-y-3" data-view="dashboard">
+      <!-- كروت الملخص -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="bg-card rounded-2xl border border-slate-800 shadow-soft p-3 space-y-1">
+          <p class="text-[11px] text-slate-400">قيمة الحافز المتوقعة</p>
+          <p id="totalIncentive" class="text-lg font-bold text-primary">0.00 ر.س</p>
+          <p id="incomeBoost" class="text-[11px] text-slate-400">
+            أدخل قيم الرحلات لتحسب نسبة الزيادة على الدخل عند تحقق الحافز.
+          </p>
+        </div>
+        <div class="bg-card rounded-2xl border border-slate-800 shadow-soft p-3 space-y-1">
+          <p class="text-[11px] text-slate-400">إجمالي الدخل من الرحلات</p>
+          <p id="totalFare" class="text-lg font-bold text-slate-100">0.00 ر.س</p>
+          <p class="text-[11px] text-slate-400">يشمل كاش + بطاقة حسب إدخالك.</p>
+        </div>
+        <div class="bg-card rounded-2xl border border-slate-800 shadow-soft p-3 space-y-1">
+          <p class="text-[11px] text-slate-400">عدد الرحلات هذا الأسبوع</p>
+          <p id="summaryTrips" class="text-lg font-bold text-slate-100">0</p>
+          <p id="summaryHours" class="text-[11px] text-slate-400">0.00 ساعة عمل من مدد الرحلات.</p>
+        </div>
+      </div>
+
+      <!-- ساعات العمل والرحلات -->
+      <div class="bg-card rounded-2xl border border-slate-800 shadow-soft p-3 space-y-2">
         <div class="flex items-center justify-between gap-2">
           <div>
-            <p class="font-semibold text-sm">إعدادات الحافز الأسبوعي (حسب رسالة يوم الإثنين)</p>
+            <p class="font-semibold text-sm">ساعات العمل والرحلات</p>
             <p class="text-[11px] text-slate-400">
-              هنا تضبط شروط ثرايف لهذا الأسبوع، ويمكنك تعديلها إذا تغيرت الرسالة في أسبوع قادم.
+              يُحسب الوقت من مدد الرحلات الفعلية لهذا الأسبوع، مع شرط 1.5 رحلة لكل ساعة إضافية.
             </p>
           </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-          <div class="space-y-1">
-            <label class="block text-[11px] text-slate-300">الحد الأدنى لساعات العمل</label>
-            <input id="minHoursInput" type="number" min="0" step="0.25"
-              class="w-full rounded-2xl bg-soft border border-slate-700 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary text-xs" />
+        <div class="grid grid-cols-2 gap-3 text-xs mt-1">
+          <div class="bg-soft rounded-2xl border border-slate-800 p-3 space-y-1">
+            <p class="text-[11px] text-slate-400">إجمالي ساعات العمل</p>
+            <p id="totalHours" class="text-lg font-bold text-slate-100">0.00</p>
+            <p id="hoursStatus"
+               class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
+              في انتظار تسجيل رحلات لحساب الساعات.
+            </p>
           </div>
-          <div class="space-y-1">
-            <label class="block text-[11px] text-slate-300">الحد الأدنى لعدد الرحلات</label>
-            <input id="minTripsInput" type="number" min="0" step="1"
-              class="w-full rounded-2xl bg-soft border border-slate-700 px-3 py-2 text-xs" />
-          </div>
-          <div class="space-y-1">
-            <label class="block text-[11px] text-slate-300">الحد الأدنى لنسبة رحلات الذروة %</label>
-            <input id="minPeakRatioInput" type="number" min="0" max="100" step="1"
-              class="w-full rounded-2xl bg-soft border border-slate-700 px-3 py-2 text-xs" />
-          </div>
-          <div class="space-y-1">
-            <label class="block text-[11px] text-slate-300">قيمة الحافز لكل رحلة (ريال)</label>
-            <input id="incentivePerTripInput" type="number" min="0" step="0.25"
-              class="w-full rounded-2xl bg-soft border border-slate-700 px-3 py-2 text-xs" />
+          <div class="bg-soft rounded-2xl border border-slate-800 p-3 space-y-1">
+            <p class="text-[11px] text-slate-400">إجمالي الرحلات</p>
+            <p id="totalTrips" class="text-lg font-bold text-slate-100">0</p>
+            <p id="requiredTripsText" class="text-[11px] text-slate-400">
+              سجّل بعض الرحلات لاحتساب الشرط التصاعدي.
+            </p>
+            <p id="remainingTripsText" class="text-[11px] text-amber-300"></p>
           </div>
         </div>
+      </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs mt-2">
-          <div class="space-y-1">
-            <label class="block text-[11px] text-slate-300">نسبة القبول الرسمية الحالية %</label>
-            <input id="acceptanceInput" type="number" min="0" max="100" step="0.1"
-              class="w-full rounded-2xl bg-soft border border-slate-700 px-3 py-2 text-xs" />
-          </div>
-          <div class="space-y-1">
-            <label class="block text-[11px] text-slate-300">نسبة الإلغاء الرسمية الحالية %</label>
-            <input id="cancelInput" type="number" min="0" max="100" step="0.1"
-              class="w-full rounded-2xl bg-soft border border-slate-700 px-3 py-2 text-xs" />
-          </div>
-          <div class="space-y-1 flex flex-col justify-end">
-            <button id="saveSettingsBtn"
-              class="w-full rounded-2xl bg-primary text-dark text-xs font-semibold px-3 py-2 shadow-soft">
-              حفظ الإعدادات وتحديث الحسابات
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <section class="bg-card rounded-2xl border border-slate-800 shadow-soft p-3 space-y-3">
+      <!-- الذروة والقبول والإلغاء -->
+      <div class="bg-card rounded-2xl border border-slate-800 shadow-soft p-3 space-y-3">
         <div class="flex items-center justify-between gap-2">
-          <p class="font-semibold text-sm">تسجيل الرحلات للأسبوع الحالي</p>
-          <div class="flex gap-2">
-            <button id="exportBtn" class="px-3 py-1.5 rounded-2xl bg-soft border border-slate-700 text-[11px]">
-              تصدير بيانات الأسبوع (JSON)
-            </button>
-            <button id="openReportBtn" class="px-3 py-1.5 rounded-2xl bg-accent text-dark text-[11px] font-semibold">
-              عرض تقرير الأسبوع (للطباعة)
-            </button>
+          <div>
+            <p class="font-semibold text-sm">الذروة وجودة الأداء</p>
+            <p class="text-[11px] text-slate-400">
+              التركيز على عملك داخل أوقات الذروة الرسمية، مع متابعة القبول والإلغاء من التطبيقات.
+            </p>
           </div>
         </div>
-        <p class="text-[11px] text-slate-400">
-          عند قبول رحلة في أوبر اضغط <span class="text-primary font-semibold">"بدء رحلة"</span>، وعند إنهائها اضغط
-          <span class="text-primary font-semibold">"إنهاء الرحلة"</span> ثم أدخل قيمة الرحلة وتفاصيل الدفع.
-        </p>
-        <div class="flex flex-wrap gap-2 text-xs items-center">
+
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div class="bg-soft rounded-2xl border border-slate-800 p-3 space-y-1">
+            <p class="text-[11px] text-slate-400">نسبة رحلات الذروة</p>
+            <p id="peakTripsRatio" class="text-lg font-bold text-slate-100">0%</p>
+            <p class="text-[11px] text-slate-400">
+              تحسب حسب عدد الرحلات التي بدأت داخل أوقات الذروة من إجمالي الرحلات.
+            </p>
+            <p class="text-[11px] text-slate-400 mt-1">نسبة وقت العمل في الذروة (من مدد الرحلات):</p>
+            <p id="peakTimeRatio" class="text-[12px] font-semibold text-primary">0%</p>
+            <p id="peakStatus"
+               class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 mt-1">
+              في انتظار تسجيل رحلات لحساب الذروة.
+            </p>
+          </div>
+
+          <div class="bg-soft rounded-2xl border border-slate-800 p-3 space-y-1">
+            <p class="text-[11px] text-slate-400">نسبة القبول والإلغاء (من التطبيقات)</p>
+            <p class="text-[11px] text-slate-400">
+              يتم إدخالهما يدويًا من أوبر/ثرايف ويمكن تحديثهما في أي لحظة.
+            </p>
+            <div class="flex flex-col gap-1 mt-1">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] text-slate-400">نسبة القبول الرسمية:</span>
+                <span id="acceptanceDisplay" class="text-[12px] font-semibold text-slate-100">غير مدخل</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] text-slate-400">نسبة الإلغاء الرسمية:</span>
+                <span id="cancelDisplay" class="text-[12px] font-semibold text-slate-100">غير مدخل</span>
+              </div>
+            </div>
+            <p id="qualityHint" class="text-[11px] text-slate-400 mt-2">
+              أدخل النِّسَب من التطبيقات لتعرف هل الشروط متحققة أم لا.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- إعدادات الحافز الأسبوعي -->
+    <section class="bg-card rounded-2xl border border-slate-800 shadow-soft p-3 space-y-3 hidden" data-view="settings">
+      <div class="flex items-center justify-between gap-2">
+        <div>
+          <p class="font-semibold text-sm">إعدادات الحافز الأسبوعي (حسب رسالة يوم الإثنين)</p>
+          <p class="text-[11px] text-slate-400">
+            عدّل هذه الأرقام كل أسبوع إذا غيّرت ثرايف شروط الحافز في الرسالة الجديدة.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-2 text-xs">
+        <label class="space-y-1">
+          <span class="text-[11px] text-slate-300">الحد الأدنى لساعات العمل (ساعة)</span>
+          <input id="minHoursInput" type="number" step="0.5"
+            class="w-full rounded-2xl bg-soft border border-slate-800 px-3 py-2 text-xs text-slate-100"
+            placeholder="مثلاً: 25" />
+        </label>
+        <label class="space-y-1">
+          <span class="text-[11px] text-slate-300">الحد الأدنى لعدد الرحلات</span>
+          <input id="minTripsInput" type="number"
+            class="w-full rounded-2xl bg-soft border border-slate-800 px-3 py-2 text-xs text-slate-100"
+            placeholder="مثلاً: 35" />
+        </label>
+        <label class="space-y-1">
+          <span class="text-[11px] text-slate-300">الحد الأدنى لنسبة رحلات الذروة (%)</span>
+          <input id="minPeakRatioInput" type="number" step="1"
+            class="w-full rounded-2xl bg-soft border border-slate-800 px-3 py-2 text-xs text-slate-100"
+            placeholder="مثلاً: 70" />
+        </label>
+        <label class="space-y-1">
+          <span class="text-[11px] text-slate-300">قيمة الحافز لكل رحلة (ريال)</span>
+          <input id="incentivePerTripInput" type="number" step="0.5"
+            class="w-full rounded-2xl bg-soft border border-slate-800 px-3 py-2 text-xs text-slate-100"
+            placeholder="مثلاً: 3" />
+        </label>
+      </div>
+
+      <div class="border-t border-slate-800 pt-3 mt-2 space-y-2">
+        <p class="font-semibold text-[12px] text-slate-100">نسبة القبول والإلغاء الرسمية (من التطبيقات)</p>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <label class="space-y-1">
+            <span class="text-[11px] text-slate-300">نسبة القبول الحالية (%)</span>
+            <input id="acceptanceInput" type="number" step="0.1"
+              class="w-full rounded-2xl bg-soft border border-slate-800 px-3 py-2 text-xs text-slate-100"
+              placeholder="مثلاً: 93" />
+          </label>
+          <label class="space-y-1">
+            <span class="text-[11px] text-slate-300">نسبة الإلغاء الحالية (%)</span>
+            <input id="cancelInput" type="number" step="0.1"
+              class="w-full rounded-2xl bg-soft border border-slate-800 px-3 py-2 text-xs text-slate-100"
+              placeholder="مثلاً: 0" />
+          </label>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button id="saveSettingsBtn"
+          class="px-4 py-2 rounded-2xl bg-primary text-dark text-xs font-semibold shadow-soft">
+          حفظ الإعدادات وتحديث الحسابات
+        </button>
+      </div>
+    </section>
+
+    <!-- تسجيل الرحلات للأسبوع الحالي -->
+    <section class="bg-card rounded-2xl border border-slate-800 shadow-soft p-3 space-y-3 hidden" data-view="rides">
+      <div class="flex items-center justify-between gap-2">
+        <div>
+          <p class="font-semibold text-sm">تسجيل الرحلات للأسبوع الحالي</p>
+          <p class="text-[11px] text-slate-400">
+            عند قبول رحلة في أوبر اضغط "بدء رحلة"، وعند إنهائها اضغط "إنهاء الرحلة" وأدخل بيانات الدفع.
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
           <button id="startRideBtn"
-            class="px-4 py-2 rounded-2xl bg-emerald-500 text-dark font-semibold shadow-soft disabled:opacity-40">
+            class="px-3 py-1.5 rounded-2xl bg-emerald-500 text-dark text-xs font-semibold shadow-soft">
             بدء رحلة
           </button>
           <button id="endRideBtn"
-            class="px-4 py-2 rounded-2xl bg-sky-500 text-dark font-semibold shadow-soft disabled:opacity-40">
+            class="px-3 py-1.5 rounded-2xl bg-soft text-slate-100 text-xs font-semibold border border-slate-700"
+            disabled>
             إنهاء الرحلة الحالية
           </button>
-          <span id="currentRideHint" class="text-[11px] text-slate-400">
-            لا توجد رحلة مفتوحة حاليًا.
-          </span>
         </div>
-      </section>
+      </div>
+      <p id="currentRideHint" class="text-[11px] text-slate-400">
+        لا توجد رحلة مفتوحة حاليًا.
+      </p>
 
-      <section class="bg-card rounded-2xl border border-slate-800 shadow-soft p-3 space-y-2">
-        <div class="flex items-center justify-between gap-2">
-          <p class="font-semibold text-sm">سجل الرحلات</p>
-          <span class="text-[11px] text-slate-500">الأحدث في الأعلى</span>
-        </div>
-        <div class="overflow-x-auto max-h-[360px] border border-slate-800 rounded-2xl">
-          <table class="min-w-full text-[11px]">
-            <thead class="bg-slate-900 text-slate-300 sticky top-0">
-              <tr>
-                <th class="px-2 py-2 text-right">#</th>
-                <th class="px-2 py-2 text-right">بداية</th>
-                <th class="px-2 py-2 text-right">نهاية</th>
-                <th class="px-2 py-2 text-right">مدة (دقائق)</th>
-                <th class="px-2 py-2 text-right">القيمة</th>
-                <th class="px-2 py-2 text-right">كاش</th>
-                <th class="px-2 py-2 text-right">بطاقة</th>
-                <th class="px-2 py-2 text-right">ذروة؟</th>
-              </tr>
-            </thead>
-            <tbody id="ridesTableBody" class="divide-y divide-slate-800 bg-slate-950/40">
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </div>
+      <div class="flex items-center justify-between gap-2 pt-1">
+        <button id="exportBtn"
+          class="px-3 py-1.5 rounded-2xl bg-soft text-[11px] text-slate-200 border border-slate-700">
+          تصدير بيانات الأسبوع (JSON)
+        </button>
+        <button id="openReportBtn"
+          class="px-3 py-1.5 rounded-2xl bg-soft text-[11px] text-slate-200 border border-slate-700">
+          عرض تقرير الأسبوع (للطباعة)
+        </button>
+      </div>
+    </section>
 
+    <!-- سجل الرحلات -->
+    <section class="bg-card rounded-2xl border border-slate-800 shadow-soft p-3 space-y-2 hidden" data-view="rides">
+      <div class="flex items-center justify-between gap-2 mb-1">
+        <p class="font-semibold text-sm">سجل الرحلات لهذا الأسبوع</p>
+        <p class="text-[11px] text-slate-400">يعرض آخر الرحلات أولاً.</p>
+      </div>
+      <div class="overflow-x-auto border border-slate-800 rounded-2xl">
+        <table class="min-w-full text-[11px]">
+          <thead class="bg-slate-900 text-slate-300">
+            <tr>
+              <th class="px-2 py-2 text-right">#</th>
+              <th class="px-2 py-2 text-right">بداية</th>
+              <th class="px-2 py-2 text-right">نهاية</th>
+              <th class="px-2 py-2 text-right">مدة (دقائق)</th>
+              <th class="px-2 py-2 text-right">قيمة الرحلة</th>
+              <th class="px-2 py-2 text-right">كاش</th>
+              <th class="px-2 py-2 text-right">بطاقة</th>
+              <th class="px-2 py-2 text-right">ذروة؟</th>
+            </tr>
+          </thead>
+          <tbody id="ridesTableBody" class="divide-y divide-slate-800 bg-slate-950/40">
+            <!-- يمتلئ ديناميكيًا من app.js -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- مودال إنهاء الرحلة -->
     <div id="endRideModal"
-      class="fixed inset-0 bg-black/70 flex items-center justify-center z-40 opacity-0 pointer-events-none transition-opacity">
-      <div class="bg-card rounded-2xl border border-slate-800 shadow-soft w-full max-w-sm p-4 space-y-3 text-xs">
-        <h3 class="font-semibold text-sm">إنهاء الرحلة</h3>
+         class="fixed inset-0 bg-black/60 flex items-center justify-center z-40 opacity-0 pointer-events-none transition-opacity duration-150">
+      <div class="w-full max-w-sm mx-3 bg-card rounded-2xl border border-slate-800 shadow-soft p-3 space-y-3">
+        <p class="font-semibold text-sm">إنهاء الرحلة وتسجيل بياناتها</p>
         <p class="text-[11px] text-slate-400">
-          تم تسجيل وقت إنهاء الرحلة الآن. أدخل قيمة الرحلة وطريقة الدفع. في حالة الدفع المختلط، أدخل فقط المبلغ
-          الكاش المستلم من العميل.
+          أدخل قيمة الرحلة إن كانت كاش أو بطاقة، وفي حالة المختلط أدخل المبلغ الكاش على الأقل.
         </p>
-        <div class="space-y-2">
-          <div class="space-y-1">
-            <label class="block text-[11px] text-slate-300">قيمة الرحلة الكاملة (ريال)</label>
-            <input id="fareInput" type="number" min="0" step="0.01"
-              class="w-full rounded-2xl bg-soft border border-slate-700 px-3 py-2 text-[11px]" />
-          </div>
-          <div class="space-y-1">
-            <label class="block text-[11px] text-slate-300">طريقة الدفع</label>
-            <div class="flex gap-2">
-              <button data-pay="cash"
-                class="payBtn flex-1 px-3 py-2 rounded-2xl bg-soft border border-slate-700 text-[11px]">
-                كاش
-              </button>
-              <button data-pay="card"
-                class="payBtn flex-1 px-3 py-2 rounded-2xl bg-soft border border-slate-700 text-[11px]">
-                بطاقة
-              </button>
-              <button data-pay="mixed"
-                class="payBtn flex-1 px-3 py-2 rounded-2xl bg-soft border border-slate-700 text-[11px]">
-                مختلط (كاش + بطاقة)
-              </button>
-            </div>
-          </div>
-          <div id="mixedCashContainer" class="space-y-1 hidden">
-            <label class="block text-[11px] text-slate-300">المبلغ الكاش المستلم من العميل (في حالة مختلط)</label>
-            <input id="cashPartInput" type="number" min="0" step="0.01"
-              class="w-full rounded-2xl bg-soft border border-slate-700 px-3 py-2 text-[11px]" />
+
+        <div class="space-y-2 text-xs">
+          <label class="space-y-1 w-full">
+            <span class="text-[11px] text-slate-300">قيمة الرحلة الكاملة (اختيارية في حالة المختلط)</span>
+            <input id="fareInput" type="number" step="0.5"
+              class="w-full rounded-2xl bg-soft border border-slate-800 px-3 py-2 text-xs text-slate-100"
+              placeholder="مثلاً: 28.50" />
+          </label>
+        </div>
+
+        <div class="space-y-1 text-xs">
+          <p class="text-[11px] text-slate-300 mb-1">طريقة الدفع</p>
+          <div class="flex items-center gap-2">
+            <button type="button"
+              class="payBtn flex-1 px-2 py-1.5 rounded-2xl bg-soft text-[11px] text-slate-100 border border-slate-700"
+              data-pay="cash">
+              كاش فقط
+            </button>
+            <button type="button"
+              class="payBtn flex-1 px-2 py-1.5 rounded-2xl bg-soft text-[11px] text-slate-100 border border-slate-700"
+              data-pay="card">
+              بطاقة فقط
+            </button>
+            <button type="button"
+              class="payBtn flex-1 px-2 py-1.5 rounded-2xl bg-soft text-[11px] text-slate-100 border border-slate-700"
+              data-pay="mixed">
+              مختلط (كاش + بطاقة)
+            </button>
           </div>
         </div>
-        <div class="flex justify-between pt-2">
+
+        <div id="mixedCashContainer" class="space-y-2 text-xs hidden">
+          <label class="space-y-1 w-full">
+            <span class="text-[11px] text-slate-300">المبلغ الكاش المستلم من العميل</span>
+            <input id="cashPartInput" type="number" step="0.5"
+              class="w-full rounded-2xl bg-soft border border-slate-800 px-3 py-2 text-xs text-slate-100"
+              placeholder="مثلاً: 10.00" />
+          </label>
+          <p class="text-[11px] text-slate-400">
+            إذا لم تدخل قيمة الرحلة الكاملة أعلاه، سيعتبر التطبيق أن الدخل الأساسي لهذه الرحلة يساوي الكاش فقط.
+          </p>
+        </div>
+
+        <div class="flex items-center justify-between gap-2 pt-2">
           <button id="cancelEndRideBtn"
-            class="px-3 py-1.5 rounded-2xl bg-slate-800 text-slate-200 text-[11px] border border-slate-700">
+            class="flex-1 px-3 py-2 rounded-2xl bg-soft text-[11px] text-slate-200 border border-slate-700">
             إلغاء
           </button>
           <button id="confirmEndRideBtn"
-            class="px-3 py-1.5 rounded-2xl bg-primary text-dark text-[11px] font-semibold">
+            class="flex-1 px-3 py-2 rounded-2xl bg-primary text-dark text-[11px] font-semibold shadow-soft">
             حفظ الرحلة
           </button>
         </div>
       </div>
     </div>
+  </main>
 
-    <script src="app.js"></script>
-  </body>
+  <script src="app.js"></script>
+</body>
 </html>
