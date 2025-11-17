@@ -1,10 +1,22 @@
 {
-  "name": "متابع حافز ثرايف V3",
-  "short_name": "حافز ثرايف",
-  "start_url": ".",
+  "name": "متابع حافز ثرايف",
+  "short_name": "ثرايف حافز",
+  "lang": "ar-SA",
+  "dir": "rtl",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#020617",
-  "theme_color": "#0f172a",
-  "lang": "ar",
-  "dir": "rtl"
+  "theme_color": "#22c55e",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
