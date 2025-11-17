@@ -47,6 +47,7 @@ function formatDateTime(iso) {
   });
 }
 
+// تعريف أوقات الذروة حسب كلام ثرايف
 function isPeak(date) {
   const d = new Date(date);
   const day = d.getDay(); // 0=Sun,1=Mon,2=Tue,3=Wed,4=Thu,5=Fri,6=Sat
@@ -61,21 +62,21 @@ function isPeak(date) {
 
   // Thu: 06:00 - 24:00 + Fri 00:00 - 01:00
   if (day === 4 && hm >= 6 * 60) return true; // Thu 06:00 -> midnight
-  if (day === 5 && hm < 60) return true; // Fri 00:00 - 01:00
+  if (day === 5 && hm < 60) return true;      // Fri 00:00 - 01:00
 
   // Fri-Sat: 18:00 - 24:00 + next day 00:00 - 01:00
   if (day === 5 && hm >= 18 * 60) return true; // Fri evening
-  if (day === 6 && hm < 60) return true; // Sat 00:00 - 01:00
+  if (day === 6 && hm < 60) return true;       // Sat 00:00 - 01:00
   if (day === 6 && hm >= 18 * 60) return true; // Sat evening
-  if (day === 0 && hm < 60) return true; // Sun 00:00 - 01:00
+  if (day === 0 && hm < 60) return true;       // Sun 00:00 - 01:00
 
   return false;
 }
 
 function getWeekInfoText() {
   const now = new Date();
-  // Monday as start: in JS, 1 is Monday
   const day = now.getDay(); // 0=Sun .. 6=Sat
+  // Monday as start: 1 = Monday, 0=Sun
   const diffToMonday = (day === 0 ? -6 : 1 - day);
   const monday = new Date(now);
   monday.setDate(now.getDate() + diffToMonday);
@@ -83,19 +84,36 @@ function getWeekInfoText() {
   const sunday = new Date(monday);
   sunday.setDate(monday.getDate() + 6);
   sunday.setHours(23, 59, 59, 999);
-  const fmt = (d) => d.toLocaleDateString('ar-SA', { year: 'numeric', month: '2-digit', day: '2-digit' });
+  const fmt = (d) =>
+    d.toLocaleDateString('ar-SA', { year: 'numeric', month: '2-digit', day: '2-digit' });
   return `الأسبوع الحالي (حسب جهازك): من الإثنين ${fmt(monday)} حتى الأحد ${fmt(sunday)}.`;
 }
 
 // ============ Dashboard Calculation ============
 function recalcDashboard() {
-  const rides = state.rides.slice().sort((a, b) => new Date(b.start).getTime() - new Date(a.start).getTime());
+  const rides = state.rides
+    .slice()
+    .sort((a, b) => new Date(b.start).getTime() - new Date(a.start).getTime());
   const totalTrips = rides.length;
   const totalSeconds = rides.reduce((s, r) => s + (r.durationSec || 0), 0);
   const totalHours = totalSeconds / 3600;
   const totalFare = rides.reduce((s, r) => s + (r.fare || 0), 0);
-  const totalCash = rides.reduce((s, r) => s + (r.cashPart || (r.payment === 'cash' ? (r.fare || 0) : 0)), 0);
-  const totalCard = rides.reduce((s, r) => s + (r.cardPart || (r.payment === 'card' ? (r.fare || 0) : 0)), 0);
+  const totalCash = rides.reduce(
+    (s, r) => s + (r.cashPart != null ? r.cashPart : r.payment === 'cash' ? (r.fare || 0) : 0),
+    0
+  );
+  const totalCard = rides.reduce(
+    (s, r) =>
+      s +
+      (r.cardPart != null
+        ? r.cardPart
+        : r.payment === 'card'
+        ? (r.fare || 0)
+        : r.payment === 'cash'
+        ? 0
+        : 0),
+    0
+  );
 
   const minHours = Number(state.rules.minHours) || 0;
   const minTrips = Number(state.rules.minTrips) || 0;
@@ -112,11 +130,10 @@ function recalcDashboard() {
     const extraTrips = Math.ceil(extraHours * 1.5);
     requiredTrips = minTrips + extraTrips;
   }
-
   const remainingTrips = Math.max(0, requiredTrips - totalTrips);
 
   // Peak stats
-  const peakRides = rides.filter(r => r.isPeak);
+  const peakRides = rides.filter((r) => r.isPeak);
   const peakTripsCount = peakRides.length;
   const peakTripsPercent = totalTrips > 0 ? (peakTripsCount / totalTrips) * 100 : 0;
   const peakTimeSeconds = peakRides.reduce((s, r) => s + (r.durationSec || 0), 0);
@@ -142,14 +159,19 @@ function recalcDashboard() {
   if (totalFareEl) totalFareEl.textContent = totalFare.toFixed(2) + ' ر.س';
   if (incomeBoostEl) {
     if (incomeBoostPercent != null) {
-      incomeBoostEl.textContent = `نسبة الزيادة الفعلية على الدخل حتى الآن: ${incomeBoostPercent.toFixed(1)}٪.`;
+      incomeBoostEl.textContent = `نسبة الزيادة الفعلية على الدخل حتى الآن: ${incomeBoostPercent.toFixed(
+        1
+      )}٪.`;
     } else {
-      incomeBoostEl.textContent = 'أدخل قيم الرحلات لتحسب نسبة الزيادة على الدخل عند تحقق الحافز.';
+      incomeBoostEl.textContent =
+        'أدخل قيم الرحلات لتحسب نسبة الزيادة على الدخل عند تحقق الحافز.';
     }
   }
   if (summaryTripsEl) summaryTripsEl.textContent = totalTrips.toString();
   if (summaryHoursEl) summaryHoursEl.textContent = totalHours.toFixed(2);
-  if (summaryPeakTripsEl) summaryPeakTripsEl.textContent = totalTrips > 0 ? peakTripsPercent.toFixed(1) + '%' : '0%';
+  if (summaryPeakTripsEl)
+    summaryPeakTripsEl.textContent =
+      totalTrips > 0 ? peakTripsPercent.toFixed(1) + '%' : '0%';
 
   // Hours & trips
   const totalHoursEl = document.getElementById('totalHours');
@@ -182,13 +204,17 @@ function recalcDashboard() {
   if (hoursStatusEl) {
     if (totalHours >= minHours) {
       hoursStatusEl.textContent = '✅ حققت الحد الأدنى لساعات العمل (تقريبًا).';
-      hoursStatusEl.className = 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300';
+      hoursStatusEl.className =
+        'text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300';
     } else if (totalHours > 0) {
-      hoursStatusEl.textContent = '⚠ تحت الحد الأدنى للساعات، ما زال بإمكانك زيادة ساعات العمل.';
-      hoursStatusEl.className = 'text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300';
+      hoursStatusEl.textContent =
+        '⚠ تحت الحد الأدنى للساعات، ما زال بإمكانك زيادة ساعات العمل.';
+      hoursStatusEl.className =
+        'text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300';
     } else {
-      hoursStatusEl.textContent = '';
-      hoursStatusEl.className = 'text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300';
+      hoursStatusEl.textContent = 'في انتظار تسجيل رحلات لحساب الساعات.';
+      hoursStatusEl.className =
+        'text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300';
     }
   }
 
@@ -200,18 +226,27 @@ function recalcDashboard() {
   const cancelDisplay = document.getElementById('cancelDisplay');
   const qualityHint = document.getElementById('qualityHint');
 
-  if (peakTripsRatioEl) peakTripsRatioEl.textContent = totalTrips > 0 ? peakTripsPercent.toFixed(1) + '%' : '0%';
-  if (peakTimeRatioEl) peakTimeRatioEl.textContent = totalSeconds > 0 ? peakTimePercent.toFixed(1) + '%' : '0%';
+  if (peakTripsRatioEl)
+    peakTripsRatioEl.textContent =
+      totalTrips > 0 ? peakTripsPercent.toFixed(1) + '%' : '0%';
+  if (peakTimeRatioEl)
+    peakTimeRatioEl.textContent =
+      totalSeconds > 0 ? peakTimePercent.toFixed(1) + '%' : '0%';
+
   if (peakStatusEl) {
     if (totalTrips === 0) {
       peakStatusEl.textContent = 'في انتظار تسجيل رحلات لحساب الذروة.';
-      peakStatusEl.className = 'text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300';
+      peakStatusEl.className =
+        'text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300';
     } else if (peakTripsPercent >= minPeakPercent) {
       peakStatusEl.textContent = '✅ نسبة رحلات الذروة تحقق شرط ثرايف (حسب عدد الرحلات).';
-      peakStatusEl.className = 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300';
+      peakStatusEl.className =
+        'text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300';
     } else {
-      peakStatusEl.textContent = '⚠ نسبة رحلات الذروة أقل من المطلوب، حاول تركيز العمل في أوقات الذروة.';
-      peakStatusEl.className = 'text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300';
+      peakStatusEl.textContent =
+        '⚠ نسبة رحلات الذروة أقل من المطلوب، حاول تركيز العمل في أوقات الذروة.';
+      peakStatusEl.className =
+        'text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300';
     }
   }
 
@@ -220,8 +255,7 @@ function recalcDashboard() {
       acceptance != null ? acceptance.toFixed(2) + '%' : 'غير مدخل';
   }
   if (cancelDisplay) {
-    cancelDisplay.textContent =
-      cancel != null ? cancel.toFixed(2) + '%' : 'غير مدخل';
+    cancelDisplay.textContent = cancel != null ? cancel.toFixed(2) + '%' : 'غير مدخل';
   }
   if (qualityHint) {
     const parts = [];
@@ -256,13 +290,17 @@ function recalcDashboard() {
 
     if (totalTrips === 0) {
       eligibilityBadge.textContent = 'في انتظار بيانات رحلات هذا الأسبوع.';
-      eligibilityBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300';
+      eligibilityBadge.className =
+        'text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300';
     } else if (okHours && okTrips && okPeak && okAcc && okCancel) {
       eligibilityBadge.textContent = '🚀 مؤهل للحافز (حسب البيانات المدخلة تقريبًا).';
-      eligibilityBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-emerald-500 text-dark';
+      eligibilityBadge.className =
+        'text-[10px] px-2 py-0.5 rounded-full bg-emerald-500 text-dark';
     } else {
-      eligibilityBadge.textContent = 'بعض الشروط لم تتحقق بعد. راجع التفاصيل أدناه.';
-      eligibilityBadge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-200';
+      eligibilityBadge.textContent =
+        'بعض الشروط لم تتحقق بعد. راجع التفاصيل في الداشبورد والإعدادات.';
+      eligibilityBadge.className =
+        'text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-200';
     }
   }
 
@@ -272,25 +310,29 @@ function recalcDashboard() {
   // If on report page, render report
   const reportRoot = document.getElementById('reportRoot');
   if (reportRoot) {
-    renderReport(reportRoot, {
-      totalTrips,
-      totalHours,
-      totalFare,
-      totalCash,
-      totalCard,
-      minHours,
-      minTrips,
-      minPeakPercent,
-      incentivePerTrip,
-      totalIncentive,
-      incomeBoostPercent,
-      peakTripsPercent,
-      peakTimePercent,
-      acceptance,
-      cancel,
-      requiredTrips,
-      peakTripsCount
-    }, rides);
+    renderReport(
+      reportRoot,
+      {
+        totalTrips,
+        totalHours,
+        totalFare,
+        totalCash,
+        totalCard,
+        minHours,
+        minTrips,
+        minPeakPercent,
+        incentivePerTrip,
+        totalIncentive,
+        incomeBoostPercent,
+        peakTripsPercent,
+        peakTimePercent,
+        acceptance,
+        cancel,
+        requiredTrips,
+        peakTripsCount
+      },
+      rides
+    );
   }
 }
 
@@ -308,8 +350,22 @@ function renderRidesTable(rides) {
       <td class="px-2 py-1 whitespace-nowrap">${formatDateTime(r.end)}</td>
       <td class="px-2 py-1">${mins.toFixed(1)}</td>
       <td class="px-2 py-1">${r.fare != null ? r.fare.toFixed(2) : '-'}</td>
-      <td class="px-2 py-1">${r.cashPart != null ? r.cashPart.toFixed(2) : (r.payment === 'cash' ? (r.fare || 0).toFixed(2) : '-')}</td>
-      <td class="px-2 py-1">${r.cardPart != null ? r.cardPart.toFixed(2) : (r.payment === 'card' ? (r.fare || 0).toFixed(2) : (r.payment === 'cash' ? '0.00' : '-'))}</td>
+      <td class="px-2 py-1">${
+        r.cashPart != null
+          ? r.cashPart.toFixed(2)
+          : r.payment === 'cash'
+          ? (r.fare || 0).toFixed(2)
+          : '-'
+      }</td>
+      <td class="px-2 py-1">${
+        r.cardPart != null
+          ? r.cardPart.toFixed(2)
+          : r.payment === 'card'
+          ? (r.fare || 0).toFixed(2)
+          : r.payment === 'cash'
+          ? '0.00'
+          : '-'
+      }</td>
       <td class="px-2 py-1">${r.isPeak ? '✅' : '—'}</td>
     `;
     tbody.appendChild(tr);
@@ -343,18 +399,27 @@ function renderReport(root, summary, rides) {
   const okPeak = peakTripsPercent >= minPeakPercent;
   const okAcc = acceptance != null && acceptance >= 65;
   const okCancel = cancel != null && cancel <= 10;
+  const weekText = getWeekInfoText();
 
-  const fmtBool = (ok) => ok ? '✅ متحقق' : '❌ غير متحقق';
+  const fmtBool = (ok) => (ok ? '✅ متحقق' : '❌ غير متحقق');
+  const fmtPercent = (v) => (v != null ? v.toFixed(2) + '%' : '-');
+  const fmtMoney = (v) => (v != null ? v.toFixed(2) + ' ر.س' : '-');
+  const fmtNum = (v) => (v != null ? v.toString() : '-');
 
-  const fmtPercent = (v) => v != null ? v.toFixed(2) + '%' : '-';
-  const fmtMoney = (v) => v != null ? v.toFixed(2) + ' ر.س' : '-';
-  const fmtNum = (v) => v != null ? v.toString() : '-';
-
-  const rowsHtml = rides.map((r, i) => {
-    const mins = (r.durationSec || 0) / 60;
-    const cash = r.cashPart != null ? r.cashPart : (r.payment === 'cash' ? (r.fare || 0) : 0);
-    const card = r.cardPart != null ? r.cardPart : (r.payment === 'card' ? (r.fare || 0) : (r.payment === 'cash' ? 0 : null));
-    return `
+  const rowsHtml = rides
+    .map((r, i) => {
+      const mins = (r.durationSec || 0) / 60;
+      const cash =
+        r.cashPart != null ? r.cashPart : r.payment === 'cash' ? (r.fare || 0) : 0;
+      const card =
+        r.cardPart != null
+          ? r.cardPart
+          : r.payment === 'card'
+          ? (r.fare || 0)
+          : r.payment === 'cash'
+          ? 0
+          : null;
+      return `
       <tr class="border-b border-slate-800">
         <td class="px-2 py-1">${i + 1}</td>
         <td class="px-2 py-1 whitespace-nowrap">${formatDateTime(r.start)}</td>
@@ -362,11 +427,14 @@ function renderReport(root, summary, rides) {
         <td class="px-2 py-1">${mins.toFixed(1)}</td>
         <td class="px-2 py-1">${r.fare != null ? r.fare.toFixed(2) : '-'}</td>
         <td class="px-2 py-1">${cash ? cash.toFixed(2) : '-'}</td>
-        <td class="px-2 py-1">${card != null ? card.toFixed(2) : '-'}</td>
+        <td class="px-2 py-1">${
+          card != null ? card.toFixed(2) : '-'
+        }</td>
         <td class="px-2 py-1">${r.isPeak ? 'ذروة' : 'عادي'}</td>
       </tr>
     `;
-  }).join('');
+    })
+    .join('');
 
   root.innerHTML = `
     <div class="space-y-3">
@@ -374,6 +442,7 @@ function renderReport(root, summary, rides) {
         <div>
           <p class="font-semibold text-sm">تقرير أسبوع الحافز - ملخص الأداء</p>
           <p class="text-[11px] text-slate-400">يُبنى هذا التقرير من البيانات المسجلة في هذا الأسبوع على جهازك.</p>
+          <p class="text-[11px] text-slate-400 mt-1">${weekText}</p>
         </div>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
@@ -398,11 +467,15 @@ function renderReport(root, summary, rides) {
         </div>
         <div class="bg-soft rounded-2xl p-3 space-y-1">
           <p class="text-[11px] text-slate-400">نسبة الزيادة الفعلية على الدخل</p>
-          <p class="text-lg font-bold">${incomeBoostPercent != null ? incomeBoostPercent.toFixed(1) + '%' : '-'}</p>
+          <p class="text-lg font-bold">${
+            incomeBoostPercent != null ? incomeBoostPercent.toFixed(1) + '%' : '-'
+          }</p>
         </div>
         <div class="bg-soft rounded-2xl p-3 space-y-1">
           <p class="text-[11px] text-slate-400">عدد رحلات الذروة</p>
-          <p class="text-lg font-bold">${fmtNum(peakTripsCount)} (${peakTripsPercent.toFixed(1)}%)</p>
+          <p class="text-lg font-bold">${fmtNum(peakTripsCount)} (${peakTripsPercent.toFixed(
+    1
+  )}%)</p>
         </div>
       </div>
 
@@ -411,18 +484,28 @@ function renderReport(root, summary, rides) {
           <p class="font-semibold text-[12px] text-slate-100 mb-1">الشروط الرسمية للحافز (حسب إدخالك)</p>
           <ul class="space-y-1 list-disc list-inside">
             <li>الحد الأدنى للساعات: ${minHours} ساعة → ${fmtBool(okHours)}</li>
-            <li>الحد الأدنى للرحلات + الشرط التصاعدي: مطلوب ${requiredTrips} رحلة (على الأقل ${minTrips}) → ${fmtBool(okTrips)}</li>
-            <li>الحد الأدنى لنسبة رحلات الذروة: ${minPeakPercent}% → ${fmtBool(okPeak)} (حاليًا ${peakTripsPercent.toFixed(1)}%)</li>
-            <li>نسبة القبول الرسمية ≥ 65% → ${fmtBool(okAcc)} (حاليًا ${acceptance != null ? acceptance.toFixed(2) + '%' : 'غير مدخلة'})</li>
-            <li>نسبة الإلغاء الرسمية ≤ 10% → ${fmtBool(okCancel)} (حاليًا ${cancel != null ? cancel.toFixed(2) + '%' : 'غير مدخلة'})</li>
+            <li>الحد الأدنى للرحلات + الشرط التصاعدي: مطلوب ${requiredTrips} رحلة (على الأقل ${minTrips}) → ${fmtBool(
+    okTrips
+  )}</li>
+            <li>الحد الأدنى لنسبة رحلات الذروة: ${minPeakPercent}% → ${fmtBool(
+    okPeak
+  )} (حاليًا ${peakTripsPercent.toFixed(1)}%)</li>
+            <li>نسبة القبول الرسمية ≥ 65% → ${fmtBool(okAcc)} (حاليًا ${
+    acceptance != null ? acceptance.toFixed(2) + '%' : 'غير مدخلة'
+  })</li>
+            <li>نسبة الإلغاء الرسمية ≤ 10% → ${fmtBool(okCancel)} (حاليًا ${
+    cancel != null ? cancel.toFixed(2) + '%' : 'غير مدخلة'
+  })</li>
           </ul>
         </div>
         <div class="bg-soft rounded-2xl p-3 space-y-1">
           <p class="font-semibold text-[12px] text-slate-100 mb-1">قرار الحافز (تقديري حسب البيانات)</p>
           <p class="text-[12px]">
-            ${okHours && okTrips && okPeak && okAcc && okCancel
-              ? '✅ جميع الشروط المدخلة متحققة تقريبًا، يفترض (منطقيًا) استحقاق الحافز لهذا الأسبوع.'
-              : '❌ لم تتحقق جميع الشروط بعد وفقًا للبيانات المدخلة. استخدم هذا التقرير كمرجع عند مراجعة الشركة.'}
+            ${
+              okHours && okTrips && okPeak && okAcc && okCancel
+                ? '✅ جميع الشروط المدخلة متحققة تقريبًا، يفترض (منطقيًا) استحقاق الحافز لهذا الأسبوع.'
+                : '❌ لم تتحقق جميع الشروط بعد وفقًا للبيانات المدخلة. استخدم هذا التقرير كمرجع عند مراجعة الشركة.'
+            }
           </p>
           <p class="text-[11px] text-slate-400 mt-2">
             ملاحظة: هذا التقرير يعتمد بالكامل على البيانات التي أدخلتها أنت في المتتبع، ولا يرتبط مباشرة بأنظمة أوبر أو ثرايف.
@@ -456,6 +539,40 @@ function renderReport(root, summary, rides) {
   `;
 }
 
+// ============ Views (Dashboard / Rides / Settings / Report) ============
+let currentView = 'dashboard';
+
+function setView(view) {
+  currentView = view;
+  document.querySelectorAll('[data-view]').forEach((el) => {
+    if (el.dataset.view === view) {
+      el.classList.remove('hidden');
+    } else {
+      el.classList.add('hidden');
+    }
+  });
+
+  document.querySelectorAll('.nav-btn').forEach((btn) => {
+    const v = btn.dataset.navView;
+    if (v === view) {
+      btn.classList.add('bg-soft', 'text-slate-100');
+      btn.classList.remove('bg-transparent');
+    } else {
+      btn.classList.remove('bg-soft', 'text-slate-100');
+      btn.classList.add('bg-transparent');
+    }
+  });
+
+  if (view === 'report') {
+    window.open('report.html', '_blank');
+    // بعد فتح التقرير، نرجع للداشبورد
+    currentView = 'dashboard';
+    document.querySelectorAll('[data-view]').forEach((el) => {
+      el.classList.toggle('hidden', el.dataset.view !== 'dashboard');
+    });
+  }
+}
+
 // ============ UI Binding ============
 let currentRide = null;
 let deferredPrompt = null;
@@ -484,12 +601,18 @@ function bindUI() {
   const cancelEndRideBtn = document.getElementById('cancelEndRideBtn');
   const confirmEndRideBtn = document.getElementById('confirmEndRideBtn');
 
+  const menuToggleBtn = document.getElementById('menuToggleBtn');
+  const closeMenuBtn = document.getElementById('closeMenuBtn');
+  const sideMenu = document.getElementById('sideMenu');
+  const navButtons = document.querySelectorAll('.nav-btn');
+
   // Fill settings
   if (minHoursInput) minHoursInput.value = state.rules.minHours;
   if (minTripsInput) minTripsInput.value = state.rules.minTrips;
   if (minPeakRatioInput) minPeakRatioInput.value = state.rules.minPeakTripsPercent;
   if (incentivePerTripInput) incentivePerTripInput.value = state.rules.incentivePerTrip;
-  if (acceptanceInput && state.stats.acceptance != null) acceptanceInput.value = state.stats.acceptance;
+  if (acceptanceInput && state.stats.acceptance != null)
+    acceptanceInput.value = state.stats.acceptance;
   if (cancelInput && state.stats.cancel != null) cancelInput.value = state.stats.cancel;
 
   // Save settings
@@ -497,8 +620,12 @@ function bindUI() {
     saveSettingsBtn.addEventListener('click', () => {
       state.rules.minHours = minHoursInput.value ? Number(minHoursInput.value) : 0;
       state.rules.minTrips = minTripsInput.value ? Number(minTripsInput.value) : 0;
-      state.rules.minPeakTripsPercent = minPeakRatioInput.value ? Number(minPeakRatioInput.value) : 0;
-      state.rules.incentivePerTrip = incentivePerTripInput.value ? Number(incentivePerTripInput.value) : 0;
+      state.rules.minPeakTripsPercent = minPeakRatioInput.value
+        ? Number(minPeakRatioInput.value)
+        : 0;
+      state.rules.incentivePerTrip = incentivePerTripInput.value
+        ? Number(incentivePerTripInput.value)
+        : 0;
       state.stats.acceptance = acceptanceInput.value ? Number(acceptanceInput.value) : null;
       state.stats.cancel = cancelInput.value ? Number(cancelInput.value) : null;
       saveState();
@@ -509,7 +636,12 @@ function bindUI() {
   // New week: clear all
   if (newWeekBtn) {
     newWeekBtn.addEventListener('click', () => {
-      if (!confirm('سيتم مسح جميع الرحلات المسجلة لهذا الأسبوع من هذا الجهاز. هل أنت متأكد؟')) return;
+      if (
+        !confirm(
+          'سيتم مسح جميع الرحلات المسجلة لهذا الأسبوع من هذا الجهاز فقط. هل أنت متأكد؟'
+        )
+      )
+        return;
       state.rides = [];
       currentRide = null;
       saveState();
@@ -517,6 +649,27 @@ function bindUI() {
       if (currentRideHint) currentRideHint.textContent = 'لا توجد رحلة مفتوحة حاليًا.';
     });
   }
+
+  // التحكم في القائمة المنزلقة
+  if (menuToggleBtn && sideMenu) {
+    menuToggleBtn.addEventListener('click', () => {
+      sideMenu.classList.remove('translate-x-full');
+    });
+  }
+  if (closeMenuBtn && sideMenu) {
+    closeMenuBtn.addEventListener('click', () => {
+      sideMenu.classList.add('translate-x-full');
+    });
+  }
+
+  navButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const targetView = btn.dataset.navView;
+      if (!targetView) return;
+      setView(targetView);
+      if (sideMenu) sideMenu.classList.add('translate-x-full');
+    });
+  });
 
   // Current ride UI
   function refreshCurrentRideUI() {
@@ -553,7 +706,7 @@ function bindUI() {
       if (fareInput) fareInput.value = '';
       if (cashPartInput) cashPartInput.value = '';
       if (mixedCashContainer) mixedCashContainer.classList.add('hidden');
-      payButtons.forEach(btn => {
+      payButtons.forEach((btn) => {
         btn.classList.remove('bg-emerald-500', 'text-dark');
         btn.classList.add('bg-soft');
       });
@@ -561,9 +714,9 @@ function bindUI() {
   }
 
   // Payment buttons
-  payButtons.forEach(btn => {
+  payButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
-      payButtons.forEach(b => {
+      payButtons.forEach((b) => {
         b.classList.remove('bg-emerald-500', 'text-dark');
         b.classList.add('bg-soft');
       });
@@ -586,7 +739,7 @@ function bindUI() {
     });
   }
 
-  // Confirm end ride
+  // Confirm end ride (منطق الدفع المختلط مع التركيز على الكاش)
   if (confirmEndRideBtn) {
     confirmEndRideBtn.addEventListener('click', () => {
       if (!currentRide) return;
@@ -597,30 +750,50 @@ function bindUI() {
         Math.round((new Date(endTime).getTime() - new Date(startTime).getTime()) / 1000)
       );
 
-      const fareVal = fareInput && fareInput.value ? Number(fareInput.value) : null;
+      const rawFareVal = fareInput && fareInput.value ? Number(fareInput.value) : null;
       const payMethod = endRideModal ? endRideModal.dataset.selectedPay || null : null;
+      let fareVal = rawFareVal;
       let cashPart = null;
       let cardPart = null;
 
-      if (!fareVal || fareVal <= 0 || !payMethod) {
-        alert('الرجاء إدخال قيمة الرحلة واختيار طريقة الدفع.');
+      if (!payMethod) {
+        alert('الرجاء اختيار طريقة الدفع.');
         return;
       }
 
-      if (payMethod === 'cash') {
-        cashPart = fareVal;
-        cardPart = 0;
-      } else if (payMethod === 'card') {
-        cashPart = 0;
-        cardPart = fareVal;
+      if (payMethod === 'cash' || payMethod === 'card') {
+        if (!fareVal || fareVal <= 0) {
+          alert('الرجاء إدخال قيمة الرحلة لهذه الطريقة (كاش أو بطاقة).');
+          return;
+        }
+        if (payMethod === 'cash') {
+          cashPart = fareVal;
+          cardPart = 0;
+        } else {
+          cashPart = 0;
+          cardPart = fareVal;
+        }
       } else if (payMethod === 'mixed') {
-        const cashVal = cashPartInput && cashPartInput.value ? Number(cashPartInput.value) : 0;
-        if (cashVal < 0 || cashVal > fareVal) {
-          alert('المبلغ الكاش يجب أن يكون أكبر من أو يساوي صفر وأصغر من أو يساوي قيمة الرحلة.');
+        const cashVal =
+          cashPartInput && cashPartInput.value ? Number(cashPartInput.value) : 0;
+        if (!cashVal || cashVal <= 0) {
+          alert('في حالة الدفع المختلط، الرجاء إدخال المبلغ الكاش المستلم من العميل.');
           return;
         }
         cashPart = cashVal;
-        cardPart = fareVal - cashVal;
+
+        // قيمة الرحلة الكاملة اختيارية:
+        // إذا لم تُدخل، يعتبر الدخل الأساسي لهذه الرحلة = الكاش فقط.
+        if (!fareVal || fareVal <= 0) {
+          fareVal = cashVal;
+          cardPart = 0;
+        } else {
+          if (cashVal > fareVal) {
+            alert('المبلغ الكاش لا يمكن أن يكون أكبر من قيمة الرحلة الكاملة.');
+            return;
+          }
+          cardPart = fareVal - cashVal;
+        }
       }
 
       const ride = {
@@ -649,7 +822,9 @@ function bindUI() {
   // Export
   if (exportBtn) {
     exportBtn.addEventListener('click', () => {
-      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(state, null, 2));
+      const dataStr =
+        'data:text/json;charset=utf-8,' +
+        encodeURIComponent(JSON.stringify(state, null, 2));
       const a = document.createElement('a');
       a.href = dataStr;
       a.download = 'thrivve-tracker-week.json';
@@ -665,6 +840,7 @@ function bindUI() {
   }
 
   refreshCurrentRideUI();
+  setView('dashboard');
 }
 
 // ============ PWA Install ============
@@ -681,10 +857,7 @@ function setupInstallButton() {
   installBtn.addEventListener('click', async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      console.log('PWA install accepted');
-    }
+    await deferredPrompt.userChoice;
     deferredPrompt = null;
     installBtn.classList.add('hidden');
   });
