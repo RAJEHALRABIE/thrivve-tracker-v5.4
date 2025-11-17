@@ -1,50 +1,79 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
-    <meta charset="utf-8" />
-    <title>تقرير أسبوع الحافز - متابع حافز ثرايف V3</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: '#22c55e',
-              dark: '#020617',
-              card: '#0f172a',
-              soft: '#1e293b'
-            }
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+  />
+  <title>تقرير أسبوع الحافز</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dark: "#020617",
+            soft: "#0f172a",
+            card: "#020617",
+            primary: "#22c55e"
+          },
+          boxShadow: {
+            soft: "0 18px 45px rgba(15,23,42,0.9)"
+          },
+          borderRadius: {
+            "2xl": "1.25rem"
           }
         }
       }
-    </script>
-    <style>
-      @media print {
-        body {
-          background: white !important;
-        }
-        .no-print {
-          display: none !important;
-        }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #020617;
+      color: #e5e7eb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    @media print {
+      body {
+        background-color: #ffffff;
+        color: #000000;
       }
-    </style>
-  </head>
-  <body class="bg-dark text-slate-100 min-h-screen">
-    <div class="max-w-4xl mx-auto px-4 py-6 space-y-4">
-      <div class="no-print flex justify-between items-center">
+      .bg-soft, .bg-card {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+      }
+      .border-slate-800 {
+        border-color: #000000 !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-dark text-slate-100">
+  <main class="max-w-4xl mx-auto px-3 py-4 space-y-3">
+    <header class="flex items-center justify-between mb-2">
+      <div>
         <h1 class="text-lg font-bold text-primary">تقرير أسبوع الحافز</h1>
-        <button onclick="window.print()" class="px-4 py-2 rounded-2xl bg-primary text-dark text-xs font-semibold">
-          طباعة / حفظ كـ PDF
-        </button>
-      </div>
-      <div id="reportRoot" class="bg-card rounded-2xl border border-slate-800 p-4 space-y-4 text-xs">
         <p class="text-[11px] text-slate-400">
-          يتم توليد التقرير اعتمادًا على بيانات الأسبوع الحالي المخزنة في المتصفح. تأكد من فتح هذا التقرير من نفس
-          الجهاز والمتصفح المستخدمين أثناء التسجيل.
+          هذا التقرير مبني على البيانات المسجلة في متابع حافز ثرايف على جهازك.
         </p>
       </div>
-    </div>
-    <script src="app.js"></script>
-  </body>
+      <button onclick="window.print()"
+        class="px-3 py-1.5 rounded-2xl bg-primary text-dark text-xs font-semibold shadow-soft">
+        طباعة / حفظ كـ PDF
+      </button>
+    </header>
+
+    <section id="reportRoot" class="bg-card rounded-2xl border border-slate-800 shadow-soft p-3 text-xs">
+      <!-- يتم ملؤه من app.js (renderReport) -->
+      <p class="text-[11px] text-slate-400">
+        في انتظار تحميل البيانات من الصفحة الرئيسية… افتح <code>index.html</code> وسجّل رحلاتك أولاً.
+      </p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
 </html>
