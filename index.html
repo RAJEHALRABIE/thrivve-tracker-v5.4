@@ -1,474 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <title>متابع حافز ثرايف</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#020617" />
-    <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div id="app">
-      <!-- رأس التطبيق -->
-      <header class="app-header">
-        <div class="header-main">
-          <div class="header-left">
-            <div class="app-logo">ثرايف حافز</div>
-            <div id="current-week-range" class="week-range"></div>
-          </div>
-          <button id="new-week-btn" class="btn btn-ghost small">أسبوع جديد</button>
-        </div>
-        <div class="header-meta">
-          <div class="pill pill-accept">
-            قبول
-            <span id="header-accept-rate">0%</span>
-          </div>
-          <div class="pill pill-cancel">
-            إلغاء
-            <span id="header-cancel-rate">0%</span>
-          </div>
-        </div>
-      </header>
-
-      <!-- المحتوى الرئيسي -->
-      <main class="app-main">
-        <!-- الشاشة الرئيسية -->
-        <section id="screen-home" class="screen active">
-          <section class="card hero-card">
-            <div class="hero-top">
-              <div>
-                <h1 class="hero-title">ملخص حافز هذا الأسبوع</h1>
-                <p class="hero-subtitle">
-                  راقب شروط ثرايف لحظيًا وتأكد من تحقيق الحافز قبل نهاية الأسبوع.
-                </p>
-              </div>
-              <div class="hero-indicator">
-                <span id="hero-indicator-dot" class="indicator-dot indicator-off"></span>
-                <span id="hero-indicator-text" class="indicator-text">غير متحقق بعد</span>
-              </div>
-            </div>
-            <div class="hero-grid">
-              <div class="hero-main-number">
-                <div class="hero-label">قيمة الحافز المتوقعة</div>
-                <div class="hero-value">
-                  <span id="hero-bonus-amount">0.00</span>
-                  <span class="hero-unit">ر.س</span>
-                </div>
-                <div class="hero-hint">
-                  = عدد الرحلات × قيمة الحافز لكل رحلة
-                </div>
-              </div>
-              <div class="hero-side">
-                <div class="hero-side-row">
-                  <span>ساعات العمل</span>
-                  <span id="hero-work-hours">0.00</span>
-                </div>
-                <div class="hero-side-row">
-                  <span>عدد الرحلات</span>
-                  <span id="hero-trip-count">0</span>
-                </div>
-                <div class="hero-side-row">
-                  <span>الدخل الأساسي</span>
-                  <span><span id="hero-total-income">0.00</span> ر.س</span>
-                </div>
-                <div class="hero-side-row">
-                  <span>نسبة زيادة الدخل</span>
-                  <span><span id="hero-income-boost">0.0</span>%</span>
-                </div>
-              </div>
-            </div>
-            <button id="status-info-btn" class="chip-info">
-              حالة الحافز الحالية
-            </button>
-          </section>
-
-          <section class="card">
-            <div class="card-header">
-              <h2>تقدّمك نحو الشروط</h2>
-              <div id="status-pill" class="status-pill status-danger">
-                <span id="status-text">لم تتحقق الشروط حتى الآن، ابدأ بتسجيل رحلاتك أولاً.</span>
-              </div>
-            </div>
-            <div class="metrics-grid">
-              <div class="metric">
-                <div class="metric-label">ساعات العمل</div>
-                <div class="metric-main">
-                  <span id="metric-total-hours">0.00</span>
-                  <span class="metric-unit">ساعة</span>
-                </div>
-                <div class="metric-sub">
-                  الحد الأدنى: <span id="metric-min-hours">25</span> ساعة
-                </div>
-                <div class="metric-bar">
-                  <div id="bar-hours" class="metric-bar-fill"></div>
-                </div>
-              </div>
-              <div class="metric">
-                <div class="metric-label">عدد الرحلات</div>
-                <div class="metric-main">
-                  <span id="metric-total-trips">0</span>
-                  <span class="metric-unit">رحلة</span>
-                </div>
-                <div class="metric-sub">
-                  المطلوب ديناميكيًا: <span id="metric-required-trips">0</span> رحلة
-                </div>
-                <div class="metric-bar">
-                  <div id="bar-trips" class="metric-bar-fill"></div>
-                </div>
-              </div>
-              <div class="metric">
-                <div class="metric-label">رحلات أوقات الذروة</div>
-                <div class="metric-main">
-                  <span id="metric-peak-percent">0.0</span>
-                  <span class="metric-unit">%</span>
-                </div>
-                <div class="metric-sub">
-                  الحد الأدنى: <span id="metric-peak-required">70</span>%
-                </div>
-                <div class="metric-bar">
-                  <div id="bar-peak" class="metric-bar-fill"></div>
-                </div>
-              </div>
-              <div class="metric">
-                <div class="metric-label">جودة الأداء</div>
-                <div class="metric-main">
-                  <span id="metric-accept-official">0</span>% قبول
-                </div>
-                <div class="metric-sub">
-                  إلغاء: <span id="metric-cancel-official">0</span>%
-                </div>
-                <div class="metric-bar">
-                  <div id="bar-quality" class="metric-bar-fill"></div>
-                </div>
-              </div>
-            </div>
-            <div id="quality-alert" class="alert alert-warning hidden">
-              <div class="alert-icon">⚠️</div>
-              <div id="quality-alert-text" class="alert-text"></div>
-            </div>
-          </section>
-
-          <section class="card">
-            <div class="card-header">
-              <h2>ملخص سريع</h2>
-            </div>
-            <ul class="quick-list">
-              <li>
-                <span>هل حققت ساعات العمل والرحلات المطلوبة؟</span>
-                <span id="quick-status-core" class="quick-pill">قيد التتبع</span>
-              </li>
-              <li>
-                <span>هل نسبة الذروة كافية؟</span>
-                <span id="quick-status-peak" class="quick-pill">قيد التتبع</span>
-              </li>
-              <li>
-                <span>هل نسب القبول والإلغاء ضمن المسموح؟</span>
-                <span id="quick-status-quality" class="quick-pill">قيد التتبع</span>
-              </li>
-            </ul>
-          </section>
-        </section>
-
-        <!-- شاشة الرحلات -->
-        <section id="screen-trips" class="screen">
-          <section class="card">
-            <div class="card-header spaced">
-              <h2>تسجيل الرحلات</h2>
-              <div id="active-trip-chip" class="chip chip-live hidden">
-                رحلة قيد التسجيل الآن
-              </div>
-            </div>
-            <div class="trip-actions">
-              <button id="start-trip-btn" class="btn btn-primary full">
-                بدء الرحلة
-              </button>
-              <button id="end-trip-btn" class="btn btn-danger full disabled" disabled>
-                إنهاء الرحلة الحالية
-              </button>
-            </div>
-            <p class="hint-text">
-              عند قبول رحلة في أوبر، اضغط <strong>بدء الرحلة</strong> هنا، وعند إنهائها اضغط
-              <strong>إنهاء الرحلة الحالية</strong> لتسجيل المدة والقيمة.
-            </p>
-          </section>
-
-          <section class="card">
-            <div class="card-header">
-              <h2>سجل الرحلات لهذا الأسبوع</h2>
-            </div>
-            <div id="trips-empty-state" class="empty-state">
-              لا توجد رحلات مسجلة حتى الآن.
-              <br />
-              ابدأ بتسجيل أول رحلة من الأزرار أعلاه.
-            </div>
-            <div id="trips-table-wrapper" class="table-wrapper hidden">
-              <table class="trips-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>البداية</th>
-                    <th>النهاية</th>
-                    <th>المدة (س)</th>
-                    <th>القيمة</th>
-                    <th>الدفع</th>
-                  </tr>
-                </thead>
-                <tbody id="trips-table-body"></tbody>
-              </table>
-            </div>
-          </section>
-        </section>
-
-        <!-- شاشة المحفظة -->
-        <section id="screen-wallet" class="screen">
-          <section class="card">
-            <div class="card-header">
-              <h2>ملخص المحفظة النقدية</h2>
-            </div>
-            <div class="wallet-grid">
-              <div class="wallet-item">
-                <div class="wallet-label">الكاش المستلم</div>
-                <div class="wallet-value">
-                  <span id="wallet-cash-total">0.00</span>
-                  <span class="wallet-unit">ر.س</span>
-                </div>
-              </div>
-              <div class="wallet-item">
-                <div class="wallet-label">رصيد المحفظة (أونلاين)</div>
-                <div class="wallet-value">
-                  <span id="wallet-online-total">0.00</span>
-                  <span class="wallet-unit">ر.س</span>
-                </div>
-              </div>
-              <div class="wallet-item">
-                <div class="wallet-label">إجمالي الدخل من الرحلات</div>
-                <div class="wallet-value">
-                  <span id="wallet-total-gross">0.00</span>
-                  <span class="wallet-unit">ر.س</span>
-                </div>
-              </div>
-            </div>
-            <p class="card-note">
-              هذه الأرقام مبنية على القيم التي أدخلتها لكل رحلة (كاش / بطاقة / مختلط).
-            </p>
-          </section>
-        </section>
-
-        <!-- شاشة الإعدادات -->
-        <section id="screen-settings" class="screen">
-          <section class="card">
-            <div class="card-header">
-              <h2>إعدادات شروط الحافز</h2>
-            </div>
-            <form id="settings-form" class="settings-form">
-              <div class="form-group">
-                <label for="input-min-hours">الحد الأدنى لساعات العمل هذا الأسبوع</label>
-                <input id="input-min-hours" type="number" min="0" step="0.5" />
-              </div>
-              <div class="form-group">
-                <label for="input-min-trips">الحد الأدنى لعدد الرحلات</label>
-                <input id="input-min-trips" type="number" min="0" step="1" />
-              </div>
-              <div class="form-group">
-                <label for="input-peak-percent">الحد الأدنى لنسبة رحلات الذروة (%)</label>
-                <input id="input-peak-percent" type="number" min="0" max="100" step="1" />
-              </div>
-              <div class="form-group">
-                <label for="input-bonus-per-trip">قيمة الحافز لكل رحلة (ر.س)</label>
-                <input id="input-bonus-per-trip" type="number" min="0" step="0.5" />
-              </div>
-              <div class="form-two">
-                <div class="form-group">
-                  <label for="input-accept-rate">نسبة القبول الرسمية (%)</label>
-                  <input id="input-accept-rate" type="number" min="0" max="100" step="1" />
-                </div>
-                <div class="form-group">
-                  <label for="input-cancel-rate">نسبة الإلغاء الرسمية (%)</label>
-                  <input id="input-cancel-rate" type="number" min="0" max="100" step="0.1" />
-                </div>
-              </div>
-              <button type="submit" class="btn btn-primary full">
-                حفظ الإعدادات
-              </button>
-            </form>
-            <p class="card-note">
-              يمكنك تعديل هذه القيم كل أسبوع حسب الرسالة التي تصلك من ثرايف يوم الاثنين، بينما نسب
-              القبول والإلغاء يمكنك تحديثها متى شئت حسب ما يظهر في تطبيق أوبر.
-            </p>
-          </section>
-
-          <section class="card">
-            <div class="card-header">
-              <h2>نسخ / استعادة بيانات المتابع</h2>
-            </div>
-            <p class="card-note">
-              استخدم هذه الأدوات لنقل بياناتك بين النسخة القديمة والجديدة للتطبيق (مثلاً بين روابط مختلفة على Netlify).
-            </p>
-            <div class="form-group">
-              <button id="export-state-btn" type="button" class="btn btn-secondary full">
-                تصدير بيانات المتابع (نسخ كنص)
-              </button>
-            </div>
-            <div class="form-group">
-              <label for="state-json-area">نص البيانات (للاستيراد أو الاحتفاظ بنسخة احتياطية)</label>
-              <textarea id="state-json-area" rows="5" style="width: 100%; border-radius: 14px; border: 1px solid rgba(148, 163, 184, 0.4); background: rgba(15, 23, 42, 0.96); color: #e5e7eb; font-size: 12px; padding: 8px;"></textarea>
-            </div>
-            <div class="form-group">
-              <button id="import-state-btn" type="button" class="btn btn-primary full">
-                استيراد البيانات من النص أعلاه
-              </button>
-            </div>
-            <p class="card-note">
-              لن يتم مسح بياناتك تلقائيًا، هذه الأدوات تعمل فقط عند استخدامها يدويًا. تأكد من لصق النص الكامل كما هو بدون تعديل.
-            </p>
-          </section>
-        </section>
-
-        <!-- شاشة التقرير -->
-        <section id="screen-report" class="screen">
-          <section class="card">
-            <div class="card-header">
-              <h2>تقرير أسبوع الحافز</h2>
-            </div>
-            <div class="report-preview">
-              <p>
-                عدد الرحلات:
-                <strong id="preview-trip-count">0</strong>
-              </p>
-              <p>
-                ساعات العمل (تقديرية من مدة الرحلات):
-                <strong id="preview-work-hours">0.00</strong> ساعة
-              </p>
-              <p>
-                إجمالي الدخل من الرحلات:
-                <strong id="preview-income">0.00</strong> ر.س
-              </p>
-              <p>
-                إجمالي الحافز المتوقع:
-                <strong id="preview-bonus">0.00</strong> ر.س
-              </p>
-            </div>
-            <button id="open-report-btn" class="btn btn-secondary full">
-              فتح صفحة التقرير التفصيلية (جاهزة للطباعة)
-            </button>
-            <p class="card-note">
-              صفحة التقرير التفصيلية يمكن طباعتها أو حفظها كملف PDF من المتصفح، وتُظهر جميع
-              الرحلات خلال فترة الحافز.
-            </p>
-          </section>
-        </section>
-      </main>
-
-      <!-- شريط التنقل السفلي -->
-      <nav class="bottom-nav">
-        <button class="nav-item active" data-target="screen-home">
-          <span class="nav-icon">🏠</span>
-          <span class="nav-label">الرئيسية</span>
-        </button>
-        <button class="nav-item" data-target="screen-trips">
-          <span class="nav-icon">🚗</span>
-          <span class="nav-label">الرحلات</span>
-        </button>
-        <button class="nav-item" data-target="screen-wallet">
-          <span class="nav-icon">💰</span>
-          <span class="nav-label">المحفظة</span>
-        </button>
-        <button class="nav-item" data-target="screen-settings">
-          <span class="nav-icon">⚙️</span>
-          <span class="nav-label">الإعدادات</span>
-        </button>
-        <button class="nav-item" data-target="screen-report">
-          <span class="nav-icon">📄</span>
-          <span class="nav-label">التقرير</span>
-        </button>
-      </nav>
-    </div>
-
-    <!-- نافذة عامة للرسائل (تنبيه / تأكيد) -->
-    <div id="modal-backdrop" class="modal-backdrop hidden">
-      <div class="modal-card">
-        <div class="modal-icon" id="modal-icon">ℹ️</div>
-        <h2 id="modal-title" class="modal-title">عنوان</h2>
-        <p id="modal-message" class="modal-message"></p>
-        <div id="modal-actions-info" class="modal-actions">
-          <button id="modal-close-btn" class="btn btn-primary full">حسناً</button>
-        </div>
-        <div id="modal-actions-confirm" class="modal-actions hidden">
-          <button id="modal-confirm-yes" class="btn btn-danger full">نعم، متأكد</button>
-          <button id="modal-confirm-no" class="btn btn-ghost full">إلغاء</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- نافذة إنهاء الرحلة (Bottom Sheet) -->
-    <div id="end-trip-sheet-backdrop" class="sheet-backdrop hidden">
-      <div class="sheet-panel">
-        <header class="sheet-header">
-          <div>
-            <h3 class="sheet-title">إنهاء الرحلة</h3>
-            <p id="sheet-trip-info" class="sheet-subtitle">
-              تحقّق من بيانات الرحلة قبل حفظها في المتابع.
-            </p>
-          </div>
-          <button id="sheet-close-btn" class="icon-btn" aria-label="إغلاق">✕</button>
-        </header>
-
-        <div class="sheet-section">
-          <p class="sheet-section-label">طريقة الدفع</p>
-          <div class="pay-type-row">
-            <button class="pay-type-btn active" data-pay-type="cash">كاش فقط</button>
-            <button class="pay-type-btn" data-pay-type="card">بطاقة فقط</button>
-            <button class="pay-type-btn" data-pay-type="mixed">مختلطة</button>
-          </div>
-        </div>
-
-        <div class="sheet-section">
-          <p class="sheet-section-label">قيم الرحلة</p>
-          <div class="sheet-inputs">
-            <label class="sheet-input-group">
-              <span>قيمة الرحلة (الإجمالي)</span>
-              <input id="sheet-fare-input" type="text" inputmode="decimal" autocomplete="off" readonly />
-            </label>
-            <label class="sheet-input-group" id="sheet-cash-group">
-              <span>الكاش المستلم</span>
-              <input id="sheet-cash-input" type="text" inputmode="decimal" autocomplete="off" readonly />
-            </label>
-          </div>
-        </div>
-
-        <div class="sheet-section">
-          <p class="sheet-section-label">لوحة الأرقام</p>
-          <div id="sheet-keypad" class="keypad">
-            <button data-key="7">7</button>
-            <button data-key="8">8</button>
-            <button data-key="9">9</button>
-            <button data-key="4">4</button>
-            <button data-key="5">5</button>
-            <button data-key="6">6</button>
-            <button data-key="1">1</button>
-            <button data-key="2">2</button>
-            <button data-key="3">3</button>
-            <button data-key="0" class="key-wide">0</button>
-            <button data-key=".">.</button>
-            <button data-key="back">⌫</button>
-          </div>
-        </div>
-
-        <div class="sheet-actions">
-          <button id="sheet-save-btn" class="btn btn-primary full">حفظ الرحلة</button>
-          <button id="sheet-cancel-btn" class="btn btn-ghost full">إلغاء</button>
-        </div>
-      </div>
-    </div>
-
-    <script src="app.js"></script>
-    <script>
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker.register("sw.js").catch(() => {});
-        });
-      }
-    </script>
-  </body>
-</html>
